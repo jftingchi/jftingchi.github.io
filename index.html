@@ -8,7 +8,7 @@
     <title></title>
 </head>
 <style>
-div.mycontainer {
+    div.mycontainer {
     width: 100%;
     overflow: auto;
 }
@@ -39,7 +39,7 @@ h1 {
             </a></p>
     </body>
     <style>
-    table,
+        table,
     th,
     td {
         border: 1px solid black;
@@ -119,3 +119,112 @@ h1 {
             <h3>下雨的夜晚</h3>
             <iframe width="33%" height="100%" src="https://www.youtube.com/embed/8SNI9YNR7pQ?si=Yzl9l9bq2ADUTyLi" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>歌曲排名圖生成器</title>
+    <style>
+        /* 基本樣式設定 */
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 1px solid #ccc; margin-top: 20px; }
+    </style>
+</head>
+
+<body>
+    <h2>歌曲排名圖生成器</h2>
+    <!-- 類別選擇 -->
+    <label><input type="radio" name="category" value="regular" checked> 常態榜單</label>
+    <label><input type="radio" name="category" value="special"> 特殊榜單</label><br><br>
+    
+    <!-- 歌曲選擇 -->
+    <label><input type="checkbox" name="song" value="Song A"> 歌曲 A</label>
+    <label><input type="checkbox" name="song" value="Song B"> 歌曲 B</label>
+    <label><input type="checkbox" name="song" value="Song C"> 歌曲 C</label><br><br>
+            
+    <!-- 名次輸入 -->
+    <label>新名次：<input type="number" id="newRank" min="1" max="10"></label>
+    <label>舊名次：<input type="number" id="oldRank" min="1" max="10"></label><br><br>
+
+    <!-- 日期輸入 -->
+    <label>日期：<input type="date" id="date"></label><br><br>
+    
+    <!-- 生成與下載按鈕 -->
+    <button id="generateBtn">生成圖片</button>
+    <a id="downloadLink" href="#" download="ranking_image.png" style="display:none;">下載圖片</a>
+            
+    <!-- 預覽畫布 -->
+    <canvas id="canvas" width="800" height="600"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const generateBtn = document.getElementById('generateBtn');
+        const downloadLink = document.getElementById('downloadLink');
+
+        // 預設底圖
+        const backgrounds = {
+            regular: 'regular_bg.png',
+            special: 'special_bg.png'
+        };
+
+        // 圓弧裝飾函數
+        function drawArc(text, x, y, maxWidth) {
+            const radius = maxWidth / 2 + 10;
+            const arcY = y + 30;
+            ctx.beginPath();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 2;
+            ctx.arc(x, arcY, radius, Math.PI, 0, false);
+                ctx.stroke();
+        }
+
+        // 生成圖片函數
+        generateBtn.addEventListener('click', () => {
+            const category = document.querySelector('input[name="category"]:checked').value;
+            const selectedSongs = Array.from(document.querySelectorAll('input[name="song"]:checked'))
+                    .map(input => input.value);
+            const newRank = document.getElementById('newRank').value;
+            const oldRank = document.getElementById('oldRank').value;
+            const date = document.getElementById('date').value;
+
+            // 清空畫布
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 載入底圖
+            const bgImage = new Image();
+            bgImage.src = backgrounds[category];
+            bgImage.onload = () => {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+
+                // 繪製日期
+                ctx.font = '20px Arial';
+                ctx.fillStyle = 'black';
+                ctx.fillText(`日期：${date}`, 20, 30);
+
+                // 動態調整文字大小與位置
+                const lineHeight = 30;
+                selectedSongs.forEach((song, index) => {
+                    const y = 100 + index * lineHeight;
+                    const text = `${newRank} ${song} (${oldRank})`;
+                    const maxWidth = canvas.width - 40;
+                    const textWidth = ctx.measureText(text).width;
+
+                    // 繪製圓弧裝飾
+                    drawArc(text, canvas.width / 2, y, textWidth);
+
+                    // 繪製文字
+                    ctx.textAlign = 'center';
+                    ctx.fillText(text, canvas.width / 2, y);
+                });
+
+                // 更新下載連結
+                const imageURL = canvas.toDataURL('image/png');
+                downloadLink.href = imageURL;
+                downloadLink.style.display = 'inline';
+            };
+        });
+    </script>
+</body>
+
+</html>
